@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "IN6MQL4R0Yd2pornG1SCc2Jc5mMPa+lX8fD2xt8UjfC7snQhGe7kEfBX2v/eXDiVLPTaZLRMLoxQ1ai+ncHRdA==",
+  "dgSpecHash": "dgG6Nu9DsdT6mG3eKjqEUxfZw92JQh4fyDcfm/sgmRCtP+519Y0kquWBF38QoAmheWJZODivY3oSHtNytkvbMQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\Gal\\RiderProjects\\SudokuSolver\\SudokuSolver\\SudokuSolver.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Gal\\.nuget\\packages\\numsharp\\0.30.0\\numsharp.0.30.0.nupkg.sha512",
+    "C:\\Users\\Gal\\.nuget\\packages\\system.memory\\4.5.4\\system.memory.4.5.4.nupkg.sha512"
+  ],
   "logs": []
 }
