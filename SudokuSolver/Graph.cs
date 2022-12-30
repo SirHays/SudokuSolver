@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NumSharp;
-using NumSharp.Generic;
-using NumSharp.Utilities;
+
 
 namespace SudokuSolver
 {
@@ -37,7 +35,7 @@ namespace SudokuSolver
             {
                 for (int x = 0; x < length; x++)
                 {
-                    vertices[i,x] = new Vertex(c, source[i]);
+                    vertices[i,x] = new Vertex(c, source[c]- '0');
                     c++;
                 }
             }
@@ -68,56 +66,62 @@ namespace SudokuSolver
                     }
 
                     var boxMatrix = Box(i, j, vertices);
-                    var width = boxMatrix[0].size;
-                    for (int k = 0; k < boxMatrix.size/width; k++)
+                    for (int k = boxMatrix[0]; k < boxMatrix[1]; k++)
                     {
-                        var row = boxMatrix[k];
-                        int l = 0;
-                        foreach (var vertex in row)
+                        for (int l = boxMatrix[2]; l < boxMatrix[3]; l++)
                         {
-                            vertices[k, l] = vertex as Vertex;
+                            if(conIndex == 22 && j == 1 && i == 0)
+                                Console.WriteLine("22");
+                            if (!vertices[k, l].Equals(vertices[i, j]))
+                            {
+                                vertices[i, j].Connections[conIndex] = vertices[k, l];
+                                Console.WriteLine(i+","+j);
+                                conIndex++;
+                            }
                         }
                     }
                 }
             }
+
+            Console.WriteLine("done");
         }
 
-        public NDArray Box(int i, int j, Vertex[,] mat)
+        public int[] Box(int i, int j, Vertex[,] mat)
         {
-            NDArray a = np.array(mat);
+             //debug. not adding 24th connection. also remove duplicates using linq later
             switch (i)
             {
                 case >= 0 and < 3:
                     switch (j)
                     {
                         case >= 0 and < 3:
-                            return a[":3,:3"];
+                            return new []{0,3,0,3};
                         case > 2 and < 6:
-                            return a[":3,4:6"];
+                            return new []{0,3,3,6};
                         case > 5 and < 9:
-                            return a[":3,7:9"];
+                            return new []{0,3,6,9};
                     }
                     break;
                 case > 2 and < 6:
                     switch (j)
                     {
                         case >= 0 and < 3:
-                            return a["4:6,:3"];
+                            return new []{3,6,0,3};
                         case > 2 and < 6:
-                            return a["4:6,4:6"];
+                            return new []{3,6,3,6};
                         case > 5 and < 9:
-                            return a["4:6,7:9"];
+                            return new []{3,6,6,9};
                     }
                     break;
                 case > 5 and < 9:
                     switch (j)
                     {
                         case >= 0 and < 3:
-                            return a["7:9,:3"];
+                            return new []{6,9,0,3};
                         case > 2 and < 6:
-                            return a["7:9,4:6"];
+                            return new []{6,9,3,6};
                         case > 5 and < 9:
-                            return a["7:9,7:9"];
+                            return new []{6,9,6,9};
                     }
                     break;
             }

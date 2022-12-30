@@ -14,5 +14,3 @@ C:\Users\Gal\RiderProjects\SudokuSolver\SudokuSolver\obj\Debug\net5.0\SudokuSolv
 C:\Users\Gal\RiderProjects\SudokuSolver\SudokuSolver\obj\Debug\net5.0\ref\SudokuSolver.dll
 C:\Users\Gal\RiderProjects\SudokuSolver\SudokuSolver\obj\Debug\net5.0\SudokuSolver.pdb
 C:\Users\Gal\RiderProjects\SudokuSolver\SudokuSolver\obj\Debug\net5.0\SudokuSolver.genruntimeconfig.cache
-C:\Users\Gal\RiderProjects\SudokuSolver\SudokuSolver\bin\Debug\net5.0\NumSharp.dll
-C:\Users\Gal\RiderProjects\SudokuSolver\SudokuSolver\obj\Debug\net5.0\SudokuSolver.csproj.CopyComplete

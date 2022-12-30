@@ -1,6 +1,4 @@
 ﻿using System;
-using NumSharp;
-using NumSharp.Utilities;
 
 namespace SudokuSolver
 {
@@ -51,13 +49,10 @@ namespace SudokuSolver
             string sudoku = "530070000600195000098000060800060003400803001700020006060000280000419005000080079";
             PrintSudoku(sudoku);
             Graph g = new Graph(sudoku);
-            Vertex[,] ver = g.vertices;
+            Vertex[] ver = g.vertices[0,0].Connections;
             for (int i = 0; i < ver.GetLength(0); i++)
             {
-                for (int j = 0; j < ver.GetLength(1); j++)
-                {
-                    Console.WriteLine(ver[i,j]);
-                }
+                Console.WriteLine(ver[i].id);
             }
         }
     }
