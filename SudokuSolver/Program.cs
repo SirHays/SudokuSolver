@@ -5,7 +5,7 @@ namespace SudokuSolver
     class Program
     {
         
-        private static void PrintSudoku(string sudoku)
+        public static void PrintSudoku(string sudoku)
         {
             Console.Write(" | ");
             InsertLine(0,sudoku,false);
@@ -28,7 +28,7 @@ namespace SudokuSolver
                     InsertLine(i ,sudoku);
             }
         }
-        private static void InsertLine(int j, string s, bool f = true)
+        public static void InsertLine(int j, string s, bool f = true)
         {
             for (int i = 0; i < 8; i++)
             {
@@ -49,11 +49,8 @@ namespace SudokuSolver
             string sudoku = "530070000600195000098000060800060003400803001700020006060000280000419005000080079";
             PrintSudoku(sudoku);
             Graph g = new Graph(sudoku);
-            Vertex[] ver = g.vertices[0,0].Connections;
-            for (int i = 0; i < ver.GetLength(0); i++)
-            {
-                Console.WriteLine(ver[i].id);
-            }
+            
+            g.ColorGraph(g,9);
         }
     }
 }

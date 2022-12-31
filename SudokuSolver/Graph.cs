@@ -1,132 +1,163 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+
+
 
 
 namespace SudokuSolver
 {
     public class Graph
     {
-        public Vertex[,] vertices;
-        private string source;
+        private readonly Vertex[,] _vertices;
+        private readonly string _source;
+        private readonly List<Vertex> _nve;
+        private readonly List<Vertex> _graphAsList;
         public Graph(string source)
         {
-            this.source = source;
-            double sqrt = Math.Sqrt(source.Length);
+            _source = source;
+            var sqrt = Math.Sqrt(source.Length);
             //checks if input is correct
-            if(sqrt % 1 != 0)
+            if (sqrt % 1 != 0)
             {
+                if (Math.Sqrt(sqrt) % 1 != 0)
+                {
+                    Console.WriteLine("input sudoku doesn't have a perfect square side length");
+                }
                 Console.WriteLine("input doesn't represent an NxN grid");
                 return;
             }
-            int length = (int)sqrt;
-            
-            vertices = new Vertex[length, length];
+
+            int length = (int) sqrt;
+
+            _vertices = new Vertex[length, length];
+            _nve = new List<Vertex>();
+            _graphAsList = new List<Vertex>();
             Initialize();
         }
 
         private void Initialize()
         {
-            
-            //converts input to an NxN matrix of vertices
-            int length = (int) Math.Sqrt(source.Length);
+            int length = (int) Math.Sqrt(_source.Length);
             int c = 0;
+
+            //convert input to an NxN matrix of vertices
             for (int i = 0; i < length; i++)
             {
                 for (int x = 0; x < length; x++)
                 {
-                    vertices[i,x] = new Vertex(c, source[c]- '0');
+                    _vertices[i, x] = new Vertex(c, _source[c] - '0');
                     c++;
                 }
             }
-            
-            for (int i = 0; i < vertices.GetLength(0); i++)
+
+            //add connections to each vertex
+            for (int i = 0; i < length; i++)
             {
-                for (int j = 0; j < vertices.GetLength(1); j++)
+                for (int j = 0; j < length; j++)
                 {
+                    Vertex currentVertex = _vertices[i, j];
                     int conIndex = 0;
-                    //adds all vertices in the same column to connections
-                    for (int k = 0; k < vertices.GetLength(0); k++)
+
+                    //add vertices in the same row and column as the current vertex
+                    for (int k = 0; k < length; k++)
                     {
-                        if(!vertices[k,j].Equals(vertices[i,j]))
+                        if (k != i)
                         {
-                            //check if this checks out
-                            vertices[i, j].Connections[conIndex] = vertices[k, j];
+                            currentVertex.Connections[conIndex] = _vertices[k, j];
                             conIndex++;
                         }
-                    }
-                    //adds all vertices in the same row to connections
-                    for (int k = 0; k < vertices.GetLength(1); k++)
-                    {
-                        if (!vertices[j, k].Equals(vertices[i, j]))
+
+                        if (k != j)
                         {
-                            vertices[i, j].Connections[conIndex] = vertices[j, k];
+                            currentVertex.Connections[conIndex] = _vertices[i, k];
                             conIndex++;
                         }
                     }
 
-                    var boxMatrix = Box(i, j, vertices);
-                    for (int k = boxMatrix[0]; k < boxMatrix[1]; k++)
+                    //add vertices in the same nxn box as the current vertex
+                    var boxLength = (int) Math.Sqrt(length);
+                    
+                    int startRow = i - i % boxLength;
+                    int startCol = j - j % boxLength;
+                    int endRow = startRow + boxLength;
+                    int endCol = startCol + boxLength;
+
+                    for (int k = startRow; k < endRow; k++)
                     {
-                        for (int l = boxMatrix[2]; l < boxMatrix[3]; l++)
+                        for (int l = startCol; l < endCol; l++)
                         {
-                            if(conIndex == 22 && j == 1 && i == 0)
-                                Console.WriteLine("22");
-                            if (!vertices[k, l].Equals(vertices[i, j]))
-                            {
-                                vertices[i, j].Connections[conIndex] = vertices[k, l];
-                                Console.WriteLine(i+","+j);
-                                conIndex++;
-                            }
+                            if (k == i || l == j) continue;
+                            currentVertex.Connections[conIndex] = _vertices[k, l];
+                            conIndex++;
                         }
                     }
                 }
             }
-
-            Console.WriteLine("done");
+            Convert(_vertices);
         }
 
-        public int[] Box(int i, int j, Vertex[,] mat)
+        private void Convert(Vertex[,] v)
         {
-             //debug. not adding 24th connection. also remove duplicates using linq later
-            switch (i)
+            for (int i = 0; i < v.GetLength(0); i++) {
+                for (int j = 0; j < v.GetLength(1); j++) {
+                    _graphAsList.Add(v[i,j]);
+                    if(v[i,j].color == 0)
+                        _nve.Add(v[i,j]);
+                }
+            }
+        }
+        
+        private string ConvertToString()
+        {
+            string sudoku = "";
+            foreach (var vertex in _graphAsList)
             {
-                case >= 0 and < 3:
-                    switch (j)
-                    {
-                        case >= 0 and < 3:
-                            return new []{0,3,0,3};
-                        case > 2 and < 6:
-                            return new []{0,3,3,6};
-                        case > 5 and < 9:
-                            return new []{0,3,6,9};
-                    }
-                    break;
-                case > 2 and < 6:
-                    switch (j)
-                    {
-                        case >= 0 and < 3:
-                            return new []{3,6,0,3};
-                        case > 2 and < 6:
-                            return new []{3,6,3,6};
-                        case > 5 and < 9:
-                            return new []{3,6,6,9};
-                    }
-                    break;
-                case > 5 and < 9:
-                    switch (j)
-                    {
-                        case >= 0 and < 3:
-                            return new []{6,9,0,3};
-                        case > 2 and < 6:
-                            return new []{6,9,3,6};
-                        case > 5 and < 9:
-                            return new []{6,9,6,9};
-                    }
-                    break;
+                sudoku += vertex.color;
+            }
+
+            return sudoku;
+        }
+        public void ColorGraph(Graph graph, int numColors)
+        {
+            //check if the coloring was successful
+            Console.WriteLine(ColorGraph(numColors, 0) ? "success" : "fail");
+            Program.PrintSudoku(ConvertToString());
+        }
+        
+        private bool ColorGraph(int numColors, int vertex)
+        {
+            //all vertices have been colored
+            if (vertex == _nve.Count)
+            {
+                return true;
             }
         
-            throw new Exception("you're an idiot");
+            //try coloring the vertex with the first available color
+            for (int color = 1; color <= numColors; color++)
+            {
+                if (!CanColor(_nve[vertex], color)) continue;
+                //color the vertex
+                _nve[vertex].color = color;
+        
+                //try coloring the next vertex
+                if (ColorGraph(numColors, vertex + 1))
+                {
+                    return true;
+                }
+        
+                //if the coloring failed, backtrack to the previous vertex and reset it's color
+                _nve[vertex].color = 0;
+            }
+            //no valid color was found for the current vertex
+            return false;
+        }
+        
+        private static bool CanColor(Vertex v, int color)
+        {
+            //check if any connected vertex has a matching color
+            return v.Connections.All(neighbor => neighbor.color != color);
         }
     }
 }
