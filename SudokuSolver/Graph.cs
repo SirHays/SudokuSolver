@@ -10,6 +10,7 @@ namespace SudokuSolver
 {
     public class Graph
     {
+        
         private readonly Vertex[,] _vertices;
         private readonly string _source;
         private readonly List<Vertex> _nve;
@@ -41,13 +42,14 @@ namespace SudokuSolver
         {
             int length = (int) Math.Sqrt(_source.Length);
             int c = 0;
-
+            int connectionsLength = (int) (3 * (length - 1) - 2 * (Math.Sqrt(length)-1));
             //convert input to an NxN matrix of vertices
             for (int i = 0; i < length; i++)
             {
                 for (int x = 0; x < length; x++)
                 {
-                    _vertices[i, x] = new Vertex(c, _source[c] - '0');
+                    _vertices[i, x] = new Vertex(_source[c] - '0');
+                    _vertices[i, x].Connections = new Vertex[connectionsLength];
                     c++;
                 }
             }
@@ -119,8 +121,9 @@ namespace SudokuSolver
 
             return sudoku;
         }
-        public void ColorGraph(Graph graph, int numColors)
+        public void ColorGraph(Graph graph)
         {
+            int numColors = (int) Math.Sqrt(graph._source.Length);
             //check if the coloring was successful
             Console.WriteLine(ColorGraph(numColors, 0) ? "success" : "fail");
             Program.PrintSudoku(ConvertToString());
@@ -157,7 +160,13 @@ namespace SudokuSolver
         private static bool CanColor(Vertex v, int color)
         {
             //check if any connected vertex has a matching color
-            return v.Connections.All(neighbor => neighbor.color != color);
+            foreach (var neighbor in v.Connections)
+            {
+                if (neighbor.color == color)
+                    return false;
+            }
+
+            return true;
         }
     }
 }
