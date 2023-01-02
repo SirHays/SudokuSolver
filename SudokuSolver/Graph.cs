@@ -11,10 +11,11 @@ namespace SudokuSolver
     public class Graph
     {
         
-        private readonly Vertex[,] _vertices;
+        private readonly int[,] _vertices;
         private readonly string _source;
-        private readonly List<Vertex> _nve;
-        private readonly List<Vertex> _graphAsList;
+        private int[] Colors;
+        private readonly int[] colorsOriginal;
+        private readonly int[][] connections;
         public Graph(string source)
         {
             _source = source;
@@ -31,10 +32,15 @@ namespace SudokuSolver
             }
 
             int length = (int) sqrt;
-
-            _vertices = new Vertex[length, length];
-            _nve = new List<Vertex>();
-            _graphAsList = new List<Vertex>();
+            int connectionsLength = (int) (3 * (length - 1) - 2 * (Math.Sqrt(length)-1));
+            connections = new int[source.Length][];
+            for (int i = 0; i < connections.Length; i++)
+            {
+                connections[i] = new int[connectionsLength];
+            }
+            _vertices = new int[length, length];
+            Colors = new int[source.Length];
+            colorsOriginal = new int[source.Length];
             Initialize();
         }
 
@@ -42,16 +48,11 @@ namespace SudokuSolver
         {
             int length = (int) Math.Sqrt(_source.Length);
             int c = 0;
-            int connectionsLength = (int) (3 * (length - 1) - 2 * (Math.Sqrt(length)-1));
             //convert input to an NxN matrix of vertices
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < _source.Length; i++)
             {
-                for (int x = 0; x < length; x++)
-                {
-                    _vertices[i, x] = new Vertex(_source[c] - '0');
-                    _vertices[i, x].Connections = new Vertex[connectionsLength];
-                    c++;
-                }
+                Colors[i] = _source[c] - '0';
+                colorsOriginal[i] = _source[c++] - '0';
             }
 
             //add connections to each vertex
@@ -59,7 +60,7 @@ namespace SudokuSolver
             {
                 for (int j = 0; j < length; j++)
                 {
-                    Vertex currentVertex = _vertices[i, j];
+                    int currentVertex = length * i + j;
                     int conIndex = 0;
 
                     //add vertices in the same row and column as the current vertex
@@ -67,14 +68,12 @@ namespace SudokuSolver
                     {
                         if (k != i)
                         {
-                            currentVertex.Connections[conIndex] = _vertices[k, j];
-                            conIndex++;
+                            connections[currentVertex][conIndex++] = k * length + j;
                         }
 
                         if (k != j)
                         {
-                            currentVertex.Connections[conIndex] = _vertices[i, k];
-                            conIndex++;
+                            connections[currentVertex][conIndex++] = i * length + k;
                         }
                     }
 
@@ -91,22 +90,9 @@ namespace SudokuSolver
                         for (int l = startCol; l < endCol; l++)
                         {
                             if (k == i || l == j) continue;
-                            currentVertex.Connections[conIndex] = _vertices[k, l];
-                            conIndex++;
+                            connections[currentVertex][conIndex++] = k * length + l;
                         }
                     }
-                }
-            }
-            Convert(_vertices);
-        }
-
-        private void Convert(Vertex[,] v)
-        {
-            for (int i = 0; i < v.GetLength(0); i++) {
-                for (int j = 0; j < v.GetLength(1); j++) {
-                    _graphAsList.Add(v[i,j]);
-                    if(v[i,j].color == 0)
-                        _nve.Add(v[i,j]);
                 }
             }
         }
@@ -114,55 +100,61 @@ namespace SudokuSolver
         private string ConvertToString()
         {
             string sudoku = "";
-            foreach (var vertex in _graphAsList)
+            int x = 0;
+            foreach (var vertex in Colors)
             {
-                sudoku += vertex.color;
+                sudoku += vertex == 0 ? System.Convert.ToChar(Colors[x++] + 48) : System.Convert.ToChar(vertex + 48);
             }
 
             return sudoku;
         }
-        public void ColorGraph(Graph graph)
+        public void ColorGraph()
         {
-            int numColors = (int) Math.Sqrt(graph._source.Length);
+            int numColors = (int) Math.Sqrt(_source.Length);
             //check if the coloring was successful
-            Console.WriteLine(ColorGraph(numColors, 0) ? "success" : "fail");
+            Console.WriteLine(ColorGraph(Colors, numColors, 0) ? "success" : "fail");
             Program.PrintSudoku(ConvertToString());
         }
         
-        private bool ColorGraph(int numColors, int vertex)
+        private bool ColorGraph(int[] colors, int numColors, int vertex)
         {
             //all vertices have been colored
-            if (vertex == _nve.Count)
+            if (vertex == colors.Length)
             {
                 return true;
             }
-        
+
+            if (colors[vertex] > 0 && colors[vertex] == colorsOriginal[vertex])
+                return ColorGraph(colors, numColors, vertex + 1);
+            
             //try coloring the vertex with the first available color
             for (int color = 1; color <= numColors; color++)
             {
-                if (!CanColor(_nve[vertex], color)) continue;
+                if (!CanColor(colors,vertex, color)) continue;
                 //color the vertex
-                _nve[vertex].color = color;
+                colors[vertex] = color;
         
                 //try coloring the next vertex
-                if (ColorGraph(numColors, vertex + 1))
+                if (ColorGraph(colors, numColors, vertex + 1))
                 {
+                    Colors = colors;
                     return true;
                 }
         
                 //if the coloring failed, backtrack to the previous vertex and reset it's color
-                _nve[vertex].color = 0;
+               colors[vertex] = 0;
             }
             //no valid color was found for the current vertex
             return false;
         }
         
-        private static bool CanColor(Vertex v, int color)
+        private bool CanColor(int[] colors, int v, int color)
         {
             //check if any connected vertex has a matching color
-            foreach (var neighbor in v.Connections)
+            for (int i = 0; i < connections[v].Length; i++)
             {
-                if (neighbor.color == color)
+                
+                if (colors[connections[v][i]] == color)
                     return false;
             }
 
