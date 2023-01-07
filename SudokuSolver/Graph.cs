@@ -121,6 +121,7 @@ namespace SudokuSolver
             //all vertices have been colored
             if (vertex == colors.Length)
             {
+                Colors = colors;
                 return true;
             }
 
@@ -137,7 +138,6 @@ namespace SudokuSolver
                 //try coloring the next vertex
                 if (ColorGraph(colors, numColors, vertex + 1))
                 {
-                    Colors = colors;
                     return true;
                 }
         
